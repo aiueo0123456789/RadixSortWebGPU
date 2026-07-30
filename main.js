@@ -9,7 +9,7 @@ const device = await adapter.requestDevice({
   },
 });
 
-let num = 10 ** 3;
+let num = 10 ** 6;
 const radixSortGPU = new RadixSortGPU(device);
 const buffer = device.createBuffer({
   size: num * 4,
@@ -21,7 +21,7 @@ device.queue.writeBuffer(
   buffer,
   0,
   new Uint32Array(
-    Array.from({ length: num }).map((x, i) => Math.round(Math.random() * 900)),
+    Array.from({ length: num }).map((x, i) => Math.round(Math.random() * 10)),
   ),
 );
 // printBufferData(device, buffer, ["u32"], "", true);

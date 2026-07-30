@@ -327,29 +327,29 @@ fn main(@builtin(global_invocation_id) globalId: vec3<u32>) {
     });
   }
 
-  dispatch(encoder, computePass, buffer) {
+  dispatch(encoder, computePass, src, dst = src) {
     const stride = this.device.limits.minUniformBufferOffsetAlignment; // 通常 256
-    if (!this.pingPongMap.has(buffer.size)) {
+    if (!this.pingPongMap.has(src.size)) {
       this.pingPongMap.set(
-        buffer.size,
+        src.size,
         new PingPong(
           this.device,
           this.processA_BindGroupLayout,
           this.processB_BindGroupLayout,
           this.bitIndicesBuffer,
-          buffer.size,
+          src.size,
         ),
       );
     }
 
-    const pingPong = this.pingPongMap.get(buffer.size);
+    const pingPong = this.pingPongMap.get(src.size);
 
     computePass.end();
 
-    encoder.copyBufferToBuffer(buffer, 0, pingPong.ping, 0, buffer.size);
+    encoder.copyBufferToBuffer(src, 0, pingPong.ping, 0, src.size);
 
     let radixSortPass = encoder.beginComputePass();
-    const length = buffer.size / 4;
+    const length = src.size / 4;
     for (let bitIndex = 0; bitIndex < this.maxPasses; ++bitIndex) {
       let isPingToPong = (bitIndex & 1) === 0;
       radixSortPass.setPipeline(this.processA_Pipeline);
@@ -383,9 +383,9 @@ fn main(@builtin(global_invocation_id) globalId: vec3<u32>) {
     encoder.copyBufferToBuffer(
       (this.maxPasses & 1) === 0 ? pingPong.ping : pingPong.pong,
       0,
-      buffer,
+      dst,
       0,
-      buffer.size,
+      src.size,
     );
     return encoder.beginComputePass();
   }
