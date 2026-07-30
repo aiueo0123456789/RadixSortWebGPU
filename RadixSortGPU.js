@@ -177,8 +177,8 @@ export class RadixSortGPU {
   }
 
   _init() {
-    this.maxPasses = 16; // 32ビット比較
-    const stride = this.device.limits.minUniformBufferOffsetAlignment; // 通常 256
+    this.maxPasses = 16; // 16ビット比較
+    const stride = this.device.limits.minUniformBufferOffsetAlignment;
     const params = new Uint32Array((stride / 4) * this.maxPasses);
 
     this.bitIndicesBuffer = this.device.createBuffer({
@@ -208,7 +208,7 @@ export class RadixSortGPU {
           visibility: GPUShaderStage.COMPUTE,
           buffer: {
             type: "uniform",
-            hasDynamicOffset: true, // これが必須
+            hasDynamicOffset: true,
             minBindingSize: 16,
           },
         },
@@ -242,7 +242,7 @@ export class RadixSortGPU {
           visibility: GPUShaderStage.COMPUTE,
           buffer: {
             type: "uniform",
-            hasDynamicOffset: true, // これが必須
+            hasDynamicOffset: true,
             minBindingSize: 16,
           },
         },
@@ -296,7 +296,7 @@ struct Uniforms {
 
 @group(0) @binding(0) var<storage, read_write> dataWrite: array<u32>; // 並び替え後
 @group(0) @binding(1) var<storage, read> dataRead: array<u32>; // 並び替え前
-@group(0) @binding(2) var<storage, read> prefixSum: array<u32>;   // f (累積和)
+@group(0) @binding(2) var<storage, read> prefixSum: array<u32>;   // 累積和
 @group(0) @binding(3) var<storage, read> invertedBit: array<u32>;
 @group(0) @binding(4) var<uniform> uniforms: Uniforms;
 
@@ -358,7 +358,7 @@ fn main(@builtin(global_invocation_id) globalId: vec3<u32>) {
         isPingToPong
           ? pingPong.processA_PingToPongBindGroup
           : pingPong.processA_PongToPingBindGroup,
-        [bitIndex * stride], // uniのoffset指定
+        [bitIndex * stride],
       );
       radixSortPass.dispatchWorkgroups(Math.ceil(length / 64));
 
@@ -375,7 +375,7 @@ fn main(@builtin(global_invocation_id) globalId: vec3<u32>) {
         isPingToPong
           ? pingPong.processB_PingToPongBindGroup
           : pingPong.processB_PongToPingBindGroup,
-        [bitIndex * stride], // uniのoffset指定
+        [bitIndex * stride],
       );
       radixSortPass.dispatchWorkgroups(Math.ceil(length / 64));
     }

@@ -85,7 +85,7 @@ export class HillisSteeleScanGPU {
     this.maxLength = 10 ** 6; // 要素数 10 ** 6 まで処理できる
 
     const maxPasses = Math.ceil(Math.log2(this.maxLength));
-    const stride = this.device.limits.minUniformBufferOffsetAlignment; // 通常 256
+    const stride = this.device.limits.minUniformBufferOffsetAlignment;
     const params = new Uint32Array((stride / 4) * maxPasses);
 
     this.stepsBuffer = this.device.createBuffer({

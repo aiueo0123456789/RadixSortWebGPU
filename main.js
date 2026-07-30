@@ -33,25 +33,3 @@ computePass.end();
 device.queue.submit([commandEncoder.finish()]);
 
 // printBufferData(device, buffer, ["u32"], "", true);
-// printBufferData(device, hillisSteeleScanGPU.pingPongMap.get(buffer.size).invertedBit, ["u32"], "invertedBit", true);
-// printBufferData(
-//   device,
-//   hillisSteeleScanGPU.pingPongMap.get(buffer.size).prefixSum,
-//   ["u32"],
-//   "prefixSum",
-//   true,
-// );
-// printBufferData(
-//   device,
-//   hillisSteeleScanGPU.pingPongMap.get(buffer.size).ping,
-//   ["u32"],
-//   "ping",
-//   true,
-// );
-// printBufferData(
-//   device,
-//   hillisSteeleScanGPU.pingPongMap.get(buffer.size).pong,
-//   ["u32"],
-//   "pong",
-//   true,
-// );
