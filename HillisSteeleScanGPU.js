@@ -163,27 +163,80 @@ fn main(input: CInput) {
         entryPoint: "main",
       },
     });
+
+    this.ping = device.createBuffer({
+      size: size,
+      usage:
+        GPUBufferUsage.STORAGE |
+        GPUBufferUsage.COPY_DST |
+        GPUBufferUsage.COPY_SRC,
+    });
+    this.pong = device.createBuffer({
+      size: size,
+      usage:
+        GPUBufferUsage.STORAGE |
+        GPUBufferUsage.COPY_DST |
+        GPUBufferUsage.COPY_SRC,
+    });
+
+    this.pingToPongBindGroup = device.createBindGroup({
+      layout: bindGroupLayout,
+      entries: [
+        {
+          binding: 0,
+          resource: {
+            buffer: this.pong,
+          },
+        },
+        {
+          binding: 1,
+          resource: {
+            buffer: this.ping,
+          },
+        },
+        {
+          binding: 2,
+          resource: {
+            buffer: stepsBuffer,
+            offset: 0,
+            size: 4 * 4,
+          },
+        },
+      ],
+    });
+    this.pongToPingBindGroup = device.createBindGroup({
+      layout: bindGroupLayout,
+      entries: [
+        {
+          binding: 0,
+          resource: {
+            buffer: this.ping,
+          },
+        },
+        {
+          binding: 1,
+          resource: {
+            buffer: this.pong,
+          },
+        },
+        {
+          binding: 2,
+          resource: {
+            buffer: stepsBuffer,
+            offset: 0,
+            size: 4 * 4,
+          },
+        },
+      ],
+    });
   }
 
   dispatch(encoder, computePass, src, dst = src) {
     const stride = this.device.limits.minUniformBufferOffsetAlignment; // 通常 256
-    if (!this.pingPongMap.has(src.size)) {
-      this.pingPongMap.set(
-        src.size,
-        new PingPong(
-          this.device,
-          this.bindGroupLayout,
-          this.stepsBuffer,
-          src.size,
-        ),
-      );
-    }
-
-    const pingPong = this.pingPongMap.get(src.size);
 
     computePass.end();
 
-    encoder.copyBufferToBuffer(src, 0, pingPong.ping, 0, src.size);
+    encoder.copyBufferToBuffer(src, 0, this.ping, 0, src.size);
 
     const scanPass = encoder.beginComputePass();
     scanPass.setPipeline(this.scanPipeline);
@@ -196,15 +249,15 @@ fn main(input: CInput) {
       scanPass.setBindGroup(
         0,
         (p & 1) === 0
-          ? pingPong.pingToPongBindGroup
-          : pingPong.pongToPingBindGroup,
+          ? this.pingToPongBindGroup
+          : this.pongToPingBindGroup,
         [p * stride], // uniのoffset指定
       );
       scanPass.dispatchWorkgroups(Math.ceil(length / 64));
     }
     scanPass.end();
     encoder.copyBufferToBuffer(
-      (passes & 1) === 0 ? pingPong.ping : pingPong.pong,
+      (passes & 1) === 0 ? this.ping : this.pong,
       0,
       dst,
       0,
