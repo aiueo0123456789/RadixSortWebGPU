@@ -43,6 +43,6 @@ export async function printBufferData(
   }
 
   readBuffer.unmap();
-  if (open) console.log(text, ...result);
+  if (open) console.log(text, result.flat());
   else console.log(text, result);
 }
