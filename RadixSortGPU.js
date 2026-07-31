@@ -247,7 +247,7 @@ fn main(@builtin(global_invocation_id) globalId: vec3<u32>) {
     });
 
     const size = this.maxLenght * 4;
-    const offset = this.maxNum * 4;
+    const offsetSize = this.maxNum * 4;
 
     this.ping = this.device.createBuffer({
       size: size,
@@ -278,7 +278,7 @@ fn main(@builtin(global_invocation_id) globalId: vec3<u32>) {
         GPUBufferUsage.COPY_SRC,
     });
     this.offset = this.device.createBuffer({
-      size: offset,
+      size: offsetSize,
       usage:
         GPUBufferUsage.STORAGE |
         GPUBufferUsage.COPY_DST |
